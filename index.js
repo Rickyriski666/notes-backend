@@ -54,20 +54,17 @@ app.get('/api/notes/:id', (req, res) => {
     });
 });
 
-app.delete('/api/notes/:id', (req, res) => {
+app.delete('/api/notes/:id', (req, res, next) => {
   const id = req.params.id;
-  notes = notes.filter((note) => note.id !== id);
-
-  res.status(204).json({
-    status: 204,
-    message: 'Delete Succesfull'
-  });
+  Note.findByIdAndDelete(id)
+    .then((result) => {
+      res.status(204).json({
+        status: 204,
+        message: 'Delete Succesfull'
+      });
+    })
+    .catch((error) => next(error));
 });
-
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
 
 app.post('/api/notes', (req, res) => {
   const { title, body, createdAt, archived } = req.body;
@@ -90,6 +87,25 @@ app.post('/api/notes', (req, res) => {
     });
   });
 });
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === 'CastError') {
+    return res.status(400).json({
+      status: error,
+      message: 'malformatted id'
+    });
+  }
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
