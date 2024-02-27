@@ -66,11 +66,6 @@ app.delete('/api/notes/:id', (req, res, next) => {
     .catch((error) => next(error));
 });
 
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
-
 app.post('/api/notes', (req, res) => {
   const { title, body, createdAt, archived } = req.body;
 
