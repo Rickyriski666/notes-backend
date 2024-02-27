@@ -31,20 +31,27 @@ app.get('/api/notes', (req, res) => {
 });
 
 app.get('/api/notes/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const note = Note.find((note) => note.id === id);
-
-  if (note) {
-    res.status(200).json({
-      status: 'success',
-      notes: note
+  const id = req.params.id;
+  Note.findById(id)
+    .then((note) => {
+      if (note) {
+        res.status(200).json({
+          status: 'success',
+          notes: note
+        });
+      } else {
+        res.status(404).json({
+          status: 404,
+          message: 'Data Not found'
+        });
+      }
+    })
+    .catch((error) => {
+      res.status(400).json({
+        status: 'error',
+        message: `${error.name} : malformatted id`
+      });
     });
-  } else {
-    res.status(404).json({
-      status: 404,
-      message: 'Data Not found'
-    });
-  }
 });
 
 app.delete('/api/notes/:id', (req, res) => {
