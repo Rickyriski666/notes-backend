@@ -54,14 +54,16 @@ app.get('/api/notes/:id', (req, res) => {
     });
 });
 
-app.delete('/api/notes/:id', (req, res) => {
+app.delete('/api/notes/:id', (req, res, next) => {
   const id = req.params.id;
-  notes = notes.filter((note) => note.id !== id);
-
-  res.status(204).json({
-    status: 204,
-    message: 'Delete Succesfull'
-  });
+  Note.findByIdAndDelete(id)
+    .then((result) => {
+      res.status(204).json({
+        status: 204,
+        message: 'Delete Succesfull'
+      });
+    })
+    .catch((error) => next(error));
 });
 
 const generateId = () => {
