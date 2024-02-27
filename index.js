@@ -32,7 +32,7 @@ app.get('/api/notes', (req, res) => {
 
 app.get('/api/notes/:id', (req, res) => {
   const id = Number(req.params.id);
-  const note = notes.find((note) => note.id === id);
+  const note = Note.find((note) => note.id === id);
 
   if (note) {
     res.status(200).json({
@@ -48,7 +48,7 @@ app.get('/api/notes/:id', (req, res) => {
 });
 
 app.delete('/api/notes/:id', (req, res) => {
-  const id = Number(req.params.id);
+  const id = req.params.id;
   notes = notes.filter((note) => note.id !== id);
 
   res.status(204).json({
@@ -63,29 +63,24 @@ const generateId = () => {
 };
 
 app.post('/api/notes', (req, res) => {
-  const data = req.body;
+  const { title, body, createdAt, archived } = req.body;
 
-  console.log(data);
-  if (!data.title) {
-    return res.status(400).json({
-      status: 'failed',
-      message: 'content missing'
-    });
+  if (!title) {
+    return res.status(400).json({ error: 'content missing' });
   }
 
-  const note = {
-    id: generateId(),
-    title: data.title,
-    body: data.body,
-    createdAt: data.createdAt,
-    archived: data.archived
-  };
+  const note = new Note({
+    title: title,
+    body: body,
+    createdAt: createdAt,
+    archived: archived
+  });
 
-  notes = notes.concat(note);
-
-  res.status(201).json({
-    status: 'success',
-    notes: note
+  note.save().then((savedNote) => {
+    res.status(201).json({
+      status: 'success',
+      notes: savedNote
+    });
   });
 });
 
