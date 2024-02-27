@@ -91,6 +91,25 @@ app.post('/api/notes', (req, res) => {
   });
 });
 
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === 'CastError') {
+    return res.status(400).json({
+      status: error,
+      message: 'malformatted id'
+    });
+  }
+};
+
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server Running on ${PORT}`);
