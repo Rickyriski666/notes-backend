@@ -10,14 +10,18 @@ console.log(`connecting to mongo`);
 mongoose
   .connect(url)
   .then((result) => {
-    console.log(`connected to db`);
+    console.log(`connected to db `);
   })
   .catch((error) => {
     console.log(`error connecting to db: ${error.message}`);
   });
 
 const noteSchema = new mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    minLength: 5,
+    require: true
+  },
   body: String,
   createdAt: String,
   archived: Boolean
