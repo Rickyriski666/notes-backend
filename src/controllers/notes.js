@@ -1,6 +1,6 @@
 const notesRouter = require('express').Router();
+const note = require('../models/note');
 const Note = require('../models/note');
-const { error } = require('../utils/logger');
 
 notesRouter.get('/', (req, res) => {
   Note.find({}).then((notes) => {
@@ -11,7 +11,7 @@ notesRouter.get('/', (req, res) => {
   });
 });
 
-notesRouter.get('/:id', (req, res, error) => {
+notesRouter.get('/:id', (req, res, next) => {
   const id = req.params.id;
   Note.findById(id)
     .then((note) => {
@@ -74,12 +74,12 @@ notesRouter.put('/:id', (req, res, next) => {
   const id = req.params.id;
   const { title, body, createdAt, archived } = req.body;
 
-  const note = new Note({
+  const note = {
     title: title,
     body: body,
     createdAt: createdAt,
     archived: archived
-  });
+  };
 
   Note.findByIdAndUpdate(id, note, { new: true })
     .then((updatedNote) => {
