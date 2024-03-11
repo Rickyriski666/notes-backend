@@ -1,5 +1,4 @@
 const notesRouter = require('express').Router();
-const note = require('../models/note');
 const Note = require('../models/note');
 
 notesRouter.get('/', (req, res) => {

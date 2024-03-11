@@ -1,10 +1,7 @@
 const express = require('express');
-const Note = require('./src/models/note');
 const app = express();
 const logger = require('./src/utils/logger');
 const middleware = require('./src/middleware');
-const requestLogger = require('./src/middleware/requestLogger');
-const unknownEndpoint = require('./src/middleware/unknownEndpoint');
 const notesRouter = require('./src/controllers/notes');
 require('dotenv').config();
 
