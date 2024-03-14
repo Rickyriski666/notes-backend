@@ -1,35 +1,37 @@
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
 
-notesRouter.get('/', (req, res) => {
-  Note.find({}).then((notes) => {
-    res.status(200).json({
-      status: 'success',
-      notes: notes
-    });
+notesRouter.get('/', async (req, res) => {
+  const notes = await Note.find({});
+
+  res.status(200).json({
+    status: 'success',
+    notes: notes
   });
 });
 
-notesRouter.get('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Note.findById(id)
-    .then((note) => {
-      if (note) {
-        res.status(200).json({
-          status: 'success',
-          notes: note
-        });
-      } else {
-        res.status(404).json({
-          status: 'failed',
-          message: 'Data Not Found'
-        });
-      }
-    })
-    .catch((error) => next(error));
+notesRouter.get('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const note = await Note.findById(id);
+
+    if (note) {
+      res.status(200).json({
+        status: 'success',
+        notes: note
+      });
+    } else {
+      res.status(404).json({
+        status: 'failed',
+        message: 'Data Not Found'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
-notesRouter.post('/', (req, res, next) => {
+notesRouter.post('/', async (req, res, next) => {
   const { title, body, createdAt, archived } = req.body;
 
   const note = new Note({
@@ -39,34 +41,36 @@ notesRouter.post('/', (req, res, next) => {
     archived: archived
   });
 
-  note
-    .save()
-    .then((savedNote) => {
-      res.status(200).json({
-        status: 'success',
-        notes: savedNote
-      });
-    })
-    .catch((error) => next(error));
+  try {
+    const savedNote = await note.save();
+    res.status(201).json({
+      status: 'success',
+      notes: savedNote
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-notesRouter.delete('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Note.findByIdAndDelete(id)
-    .then((note) => {
-      if (note) {
-        res.status(200).json({
-          status: 'deleted successfully',
-          notes: note
-        });
-      } else {
-        res.status(200).json({
-          status: 'deleted failed',
-          message: 'note not found'
-        });
-      }
-    })
-    .catch((error) => next(error));
+notesRouter.delete('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const noteToDelete = await Note.findByIdAndDelete(id);
+
+    if (noteToDelete) {
+      res.status(200).json({
+        status: 'deleted successfully',
+        notes: noteToDelete
+      });
+    } else {
+      res.status(404).json({
+        status: 'deleted failed',
+        message: 'note not found'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 notesRouter.put('/:id', (req, res, next) => {

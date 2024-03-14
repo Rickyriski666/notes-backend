@@ -6,7 +6,7 @@ const errorHandler = (error, req, res, next) => {
   if (error.name === 'CastError') {
     return res.status(400).json({
       status: 'Error',
-      message: 'malforamtted id'
+      message: 'malformatted id'
     });
   }
 

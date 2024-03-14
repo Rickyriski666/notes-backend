@@ -3,7 +3,10 @@ require('dotenv').config();
 
 mongoose.set('strictQuery', false);
 
-const url = process.env.mongo_URL;
+const url =
+  process.env.NODE_ENV === 'test'
+    ? process.env.TEST_MONGO_URL
+    : process.env.MONGO_URL;
 
 console.log(`connecting to mongo`);
 
