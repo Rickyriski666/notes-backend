@@ -2,22 +2,13 @@ const { test, after, beforeEach } = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
-const app = require('../app');
-const Note = require('../models/note');
+const app = require('../../app');
+const Note = require('../../models/note');
 const api = supertest(app);
-const helper = require('./test_helper');
+const helper = require('../test_helper');
 
 beforeEach(async () => {
   await Note.deleteMany({});
-  // console.log('cleared');
-
-  // helper.initialNotes.forEach(async (note) => {
-  //   let noteObject = new Note(note);
-  //   await noteObject.save();
-  //   console.log('saved');
-  // });
-
-  // console.log('done');
 
   for (const note of helper.initialNotes) {
     let noteObject = new Note(note);
@@ -59,7 +50,7 @@ test('a valid note can be added', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/);
 
-  const response = await helper.notesInDb();
+  const response = await helper.datasInDb();
 
   const contents = response.map((note) => note.title);
 
@@ -78,18 +69,18 @@ test('note without tittle is not added', async () => {
 
   await api.post('/api/notes').send(newNote).expect(400);
 
-  const response = await helper.notesInDb();
+  const response = await helper.datasInDb();
 
   assert.strictEqual(response.length, helper.initialNotes.length);
 });
 
 test('a note can be deleted', async () => {
-  const noteAtStart = await helper.notesInDb();
+  const noteAtStart = await helper.datasInDb();
   const notesToDelete = noteAtStart[0];
 
   await api.delete(`/api/notes/${notesToDelete.id}`);
 
-  const notesAtEnd = await helper.notesInDb();
+  const notesAtEnd = await helper.datasInDb();
 
   const content = notesAtEnd.map((r) => r.title);
 
