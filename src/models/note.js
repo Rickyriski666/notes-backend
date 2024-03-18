@@ -37,9 +37,17 @@ const noteSchema = new mongoose.Schema({
 noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
+
     delete returnedObject.__v;
+    delete returnedObject._id;
+
+    return {
+      id: returnedObject.id,
+      ...returnedObject
+    };
   }
 });
 
-module.exports = mongoose.model('note', noteSchema);
+const Note = mongoose.model('Note', noteSchema);
+
+module.exports = Note;

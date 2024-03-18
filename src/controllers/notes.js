@@ -1,5 +1,6 @@
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
+const User = require('../models/user');
 
 notesRouter.get('/', async (req, res) => {
   const notes = await Note.find({});
@@ -32,17 +33,23 @@ notesRouter.get('/:id', async (req, res, next) => {
 });
 
 notesRouter.post('/', async (req, res, next) => {
-  const { title, body, createdAt, archived } = req.body;
-
-  const note = new Note({
-    title: title,
-    body: body,
-    createdAt: createdAt,
-    archived: archived
-  });
-
   try {
+    const { title, body, createdAt, archived, userId } = req.body;
+
+    const user = await User.findById(userId);
+
+    const note = new Note({
+      title: title,
+      body: body,
+      createdAt: createdAt,
+      archived: archived,
+      user: user.id
+    });
+
     const savedNote = await note.save();
+    user.notes = user.notes.concat(savedNote._id);
+    await user.save();
+
     res.status(201).json({
       status: 'success',
       notes: savedNote
