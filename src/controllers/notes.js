@@ -1,73 +1,83 @@
 const notesRouter = require('express').Router();
-const note = require('../models/note');
 const Note = require('../models/note');
+const User = require('../models/user');
 
-notesRouter.get('/', (req, res) => {
-  Note.find({}).then((notes) => {
-    res.status(200).json({
-      status: 'success',
-      notes: notes
-    });
+notesRouter.get('/', async (req, res) => {
+  const notes = await Note.find({}).populate('user', { password: 0, notes: 0 });
+
+  res.status(200).json({
+    status: 'success',
+    notes: notes
   });
 });
 
-notesRouter.get('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Note.findById(id)
-    .then((note) => {
-      if (note) {
-        res.status(200).json({
-          status: 'success',
-          notes: note
-        });
-      } else {
-        res.status(404).json({
-          status: 'failed',
-          message: 'Data Not Found'
-        });
-      }
-    })
-    .catch((error) => next(error));
-});
+notesRouter.get('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const note = await Note.findById(id);
 
-notesRouter.post('/', (req, res, next) => {
-  const { title, body, createdAt, archived } = req.body;
-
-  const note = new Note({
-    title: title,
-    body: body,
-    createdAt: createdAt,
-    archived: archived
-  });
-
-  note
-    .save()
-    .then((savedNote) => {
+    if (note) {
       res.status(200).json({
         status: 'success',
-        notes: savedNote
+        notes: note
       });
-    })
-    .catch((error) => next(error));
+    } else {
+      res.status(404).json({
+        status: 'failed',
+        message: 'Data Not Found'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
-notesRouter.delete('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Note.findByIdAndDelete(id)
-    .then((note) => {
-      if (note) {
-        res.status(200).json({
-          status: 'deleted successfully',
-          notes: note
-        });
-      } else {
-        res.status(200).json({
-          status: 'deleted failed',
-          message: 'note not found'
-        });
-      }
-    })
-    .catch((error) => next(error));
+notesRouter.post('/', async (req, res, next) => {
+  try {
+    const { title, body, createdAt, archived, userId } = req.body;
+
+    const user = await User.findById(userId);
+
+    const note = new Note({
+      title: title,
+      body: body,
+      createdAt: createdAt,
+      archived: archived,
+      user: user.id
+    });
+
+    const savedNote = await note.save();
+    user.notes = user.notes.concat(savedNote._id);
+    await user.save();
+
+    res.status(201).json({
+      status: 'success',
+      notes: savedNote
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+notesRouter.delete('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const noteToDelete = await Note.findByIdAndDelete(id);
+
+    if (noteToDelete) {
+      res.status(200).json({
+        status: 'deleted successfully',
+        notes: noteToDelete
+      });
+    } else {
+      res.status(404).json({
+        status: 'deleted failed',
+        message: 'note not found'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 notesRouter.put('/:id', (req, res, next) => {

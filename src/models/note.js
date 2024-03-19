@@ -3,7 +3,10 @@ require('dotenv').config();
 
 mongoose.set('strictQuery', false);
 
-const url = process.env.mongo_URL;
+const url =
+  process.env.NODE_ENV === 'test'
+    ? process.env.TEST_MONGO_URL
+    : process.env.MONGO_URL;
 
 console.log(`connecting to mongo`);
 
@@ -24,15 +27,27 @@ const noteSchema = new mongoose.Schema({
   },
   body: String,
   createdAt: String,
-  archived: Boolean
+  archived: Boolean,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 });
 
 noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
+
     delete returnedObject.__v;
+    delete returnedObject._id;
+
+    return {
+      id: returnedObject.id,
+      ...returnedObject
+    };
   }
 });
 
-module.exports = mongoose.model('note', noteSchema);
+const Note = mongoose.model('Note', noteSchema);
+
+module.exports = Note;
