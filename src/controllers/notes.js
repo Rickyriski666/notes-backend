@@ -1,13 +1,15 @@
 const notesRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Note = require('../models/note');
 const User = require('../models/user');
+const getToken = require('../utils/getToken');
 
 notesRouter.get('/', async (req, res) => {
   const notes = await Note.find({}).populate('user', { password: 0, notes: 0 });
 
   res.status(200).json({
     status: 'success',
-    notes: notes
+    notes: notes,
   });
 });
 
@@ -19,12 +21,12 @@ notesRouter.get('/:id', async (req, res, next) => {
     if (note) {
       res.status(200).json({
         status: 'success',
-        notes: note
+        notes: note,
       });
     } else {
       res.status(404).json({
         status: 'failed',
-        message: 'Data Not Found'
+        message: 'Data Not Found',
       });
     }
   } catch (error) {
@@ -36,14 +38,23 @@ notesRouter.post('/', async (req, res, next) => {
   try {
     const { title, body, createdAt, archived, userId } = req.body;
 
-    const user = await User.findById(userId);
+    const decodedToken = jwt.verify(getToken(req), process.env.SECRET_JWT);
+    console.log('ini dinotes', decodedToken.id);
+    if (!decodedToken.id) {
+      return res.status(401).json({
+        status: 'failed',
+        message: 'Token Invalid',
+      });
+    }
+
+    const user = await User.findById(decodedToken.id);
 
     const note = new Note({
       title: title,
       body: body,
       createdAt: createdAt,
       archived: archived,
-      user: user.id
+      user: user.id,
     });
 
     const savedNote = await note.save();
@@ -52,7 +63,7 @@ notesRouter.post('/', async (req, res, next) => {
 
     res.status(201).json({
       status: 'success',
-      notes: savedNote
+      notes: savedNote,
     });
   } catch (error) {
     next(error);
@@ -67,12 +78,12 @@ notesRouter.delete('/:id', async (req, res, next) => {
     if (noteToDelete) {
       res.status(200).json({
         status: 'deleted successfully',
-        notes: noteToDelete
+        notes: noteToDelete,
       });
     } else {
       res.status(404).json({
         status: 'deleted failed',
-        message: 'note not found'
+        message: 'note not found',
       });
     }
   } catch (error) {
@@ -88,14 +99,14 @@ notesRouter.put('/:id', (req, res, next) => {
     title: title,
     body: body,
     createdAt: createdAt,
-    archived: archived
+    archived: archived,
   };
 
   Note.findByIdAndUpdate(id, note, { new: true })
     .then((updatedNote) => {
       res.status(200).json({
         status: 'updated successfully',
-        notes: updatedNote
+        notes: updatedNote,
       });
     })
     .catch((error) => next(error));

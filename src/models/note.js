@@ -23,15 +23,15 @@ const noteSchema = new mongoose.Schema({
   title: {
     type: String,
     minLength: 5,
-    require: true
+    require: true,
   },
   body: String,
   createdAt: String,
   archived: Boolean,
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
+    ref: 'User',
+  },
 });
 
 noteSchema.set('toJSON', {
@@ -43,9 +43,9 @@ noteSchema.set('toJSON', {
 
     return {
       id: returnedObject.id,
-      ...returnedObject
+      ...returnedObject,
     };
-  }
+  },
 });
 
 const Note = mongoose.model('Note', noteSchema);
