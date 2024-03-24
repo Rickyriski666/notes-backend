@@ -39,7 +39,6 @@ notesRouter.post('/', async (req, res, next) => {
     const { title, body, createdAt, archived, userId } = req.body;
 
     const decodedToken = jwt.verify(getToken(req), process.env.SECRET_JWT);
-    console.log('ini dinotes', decodedToken.id);
     if (!decodedToken.id) {
       return res.status(401).json({
         status: 'failed',
