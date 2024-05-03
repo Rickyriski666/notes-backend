@@ -5,23 +5,23 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   name: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   notes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Note'
-    }
-  ]
+      ref: 'Note',
+    },
+  ],
 });
 
 userSchema.set('toJSON', {
@@ -34,15 +34,13 @@ userSchema.set('toJSON', {
 
     return {
       id: returnedObject.id,
-      ...returnedObject
+      ...returnedObject,
     };
-  }
+  },
 });
 
 userSchema.plugin(mongooseUniqueValidator, {
-  message: 'Error, expected {PATH} to be unique.'
+  message: 'Error, expected {PATH} to be unique.',
 });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = userSchema;

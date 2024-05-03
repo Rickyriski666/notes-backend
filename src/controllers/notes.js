@@ -1,11 +1,14 @@
 const notesRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
+const models = require('../models');
 const Note = require('../models/note');
 const User = require('../models/user');
 const getToken = require('../utils/getToken');
 
 notesRouter.get('/', async (req, res) => {
-  const notes = await Note.find({}).populate('user', { password: 0, notes: 0 });
+  const notes = await models.noteModel
+    .find({})
+    .populate('user', { password: 0, notes: 0 });
 
   res.status(200).json({
     status: 'success',
@@ -16,7 +19,7 @@ notesRouter.get('/', async (req, res) => {
 notesRouter.get('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
-    const note = await Note.findById(id);
+    const note = await models.noteModel.findById(id);
 
     if (note) {
       res.status(200).json({
@@ -47,9 +50,9 @@ notesRouter.post('/', async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(decodedToken.id);
+    const user = await models.userModel.findById(decodedToken.id);
 
-    const note = new Note({
+    const note = new models.noteModel({
       title: title,
       body: body,
       createdAt: createdAt,
@@ -73,7 +76,7 @@ notesRouter.post('/', async (req, res, next) => {
 notesRouter.delete('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
-    const noteToDelete = await Note.findByIdAndDelete(id);
+    const noteToDelete = await models.noteModel.findByIdAndDelete(id);
 
     if (noteToDelete) {
       res.status(200).json({
@@ -102,7 +105,8 @@ notesRouter.put('/:id', (req, res, next) => {
     archived: archived,
   };
 
-  Note.findByIdAndUpdate(id, note, { new: true })
+  models.noteModel
+    .findByIdAndUpdate(id, note, { new: true })
     .then((updatedNote) => {
       res.status(200).json({
         status: 'updated successfully',

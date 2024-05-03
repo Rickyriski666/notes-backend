@@ -1,23 +1,4 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
-
-mongoose.set('strictQuery', false);
-
-const url =
-  process.env.NODE_ENV === 'test'
-    ? process.env.TEST_MONGO_URL
-    : process.env.MONGO_URL;
-
-console.log(`connecting to mongo`);
-
-mongoose
-  .connect(url)
-  .then((result) => {
-    console.log(`connected to db `);
-  })
-  .catch((error) => {
-    console.log(`error connecting to db: ${error.message}`);
-  });
 
 const noteSchema = new mongoose.Schema({
   title: {
@@ -48,6 +29,4 @@ noteSchema.set('toJSON', {
   },
 });
 
-const Note = mongoose.model('Note', noteSchema);
-
-module.exports = Note;
+module.exports = noteSchema;
