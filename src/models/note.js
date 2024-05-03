@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-const db = require('../db/db');
-require('dotenv').config();
+
 
 const noteSchema = new mongoose.Schema({
   title: {
@@ -31,6 +30,5 @@ noteSchema.set('toJSON', {
   },
 });
 
-const Note = db.model('Note', noteSchema);
 
-module.exports = Note;
+module.exports = noteSchema;
