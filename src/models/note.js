@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 const noteSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -28,5 +29,6 @@ noteSchema.set('toJSON', {
     };
   },
 });
+
 
 module.exports = noteSchema;
