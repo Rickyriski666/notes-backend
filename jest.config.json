@@ -1,0 +1,6 @@
+{
+  "testEnvironment": "node",
+  "bail": 1,
+  "verbose": true,
+  "globalTeardown": "./src/utils/teardown.js"
+}
