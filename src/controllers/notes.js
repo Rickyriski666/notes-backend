@@ -1,13 +1,9 @@
 const notesRouter = require('express').Router();
-const jwt = require('jsonwebtoken');
-const models = require('../models');
-const Note = require('../models/note');
-const User = require('../models/user');
-const getToken = require('../utils/getToken');
+const DB = require('../models');
 
 notesRouter.get('/', async (req, res) => {
-  const notes = await models.noteModel
-    .find({})
+  const notes = await DB.noteModel
+    .find({ user: req.user.id })
     .populate('user', { password: 0, notes: 0 });
 
   res.status(200).json({
@@ -19,7 +15,7 @@ notesRouter.get('/', async (req, res) => {
 notesRouter.get('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
-    const note = await models.noteModel.findById(id);
+    const note = await DB.noteModel.findById(id);
 
     if (note) {
       res.status(200).json({
@@ -39,22 +35,14 @@ notesRouter.get('/:id', async (req, res, next) => {
 
 notesRouter.post('/', async (req, res, next) => {
   try {
-    const { title, body, createdAt, archived, userId } = req.body;
+    const { title, body, archived } = req.body;
 
-    const decodedToken = jwt.verify(getToken(req), process.env.SECRET_JWT);
-    if (!decodedToken.id) {
-      return res.status(401).json({
-        status: 'failed',
-        message: 'Token Invalid',
-      });
-    }
+    const user = await DB.userModel.findById(req.user.id);
 
-    const user = await models.userModel.findById(decodedToken.id);
-
-    const note = new models.noteModel({
+    const note = new DB.noteModel({
       title: title,
       body: body,
-      createdAt: createdAt,
+      createdAt: new Date(),
       archived: archived,
       user: user.id,
     });
@@ -75,10 +63,10 @@ notesRouter.post('/', async (req, res, next) => {
 notesRouter.delete('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
-    const noteToDelete = await models.noteModel.findByIdAndDelete(id);
+    const noteToDelete = await DB.noteModel.findByIdAndDelete(id);
 
     if (noteToDelete) {
-      res.status(200).json({
+      res.status(204).json({
         status: 'deleted successfully',
         notes: noteToDelete,
       });
@@ -104,11 +92,11 @@ notesRouter.put('/:id', (req, res, next) => {
     archived: archived,
   };
 
-  models.noteModel
+  DB.noteModel
     .findByIdAndUpdate(id, note, { new: true })
     .then((updatedNote) => {
       res.status(200).json({
-        status: 'updated successfully',
+        status: 'update successfully',
         notes: updatedNote,
       });
     })

@@ -3,15 +3,15 @@ const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
 const app = require('../../app');
-const Note = require('../../models/note');
+const models = require('../../models');
 const api = supertest(app);
 const helper = require('../test_helper');
 
 beforeEach(async () => {
-  await Note.deleteMany({});
+  await models.noteModel.deleteMany({});
 
   for (const note of helper.initialNotes) {
-    let noteObject = new Note(note);
+    let noteObject = new models.noteModel(note);
     await noteObject.save();
   }
 });
@@ -41,7 +41,7 @@ test('a valid note can be added', async () => {
     title: 'async/await simplifies making async calls',
     body: '',
     createdAt: '2022-04-14T04:27:34.572Z',
-    archived: false
+    archived: false,
   };
 
   await api
@@ -64,7 +64,7 @@ test('note without tittle is not added', async () => {
     title: '',
     body: '',
     createdAt: '2022-04-14T04:27:34.572Z',
-    archived: false
+    archived: false,
   };
 
   await api.post('/api/notes').send(newNote).expect(400);
