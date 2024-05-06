@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
 
-
 const noteSchema = new mongoose.Schema({
-  title: {
+  title: String,
+  body: {
     type: String,
-    minLength: 5,
-    require: true,
+    required: true,
   },
-  body: String,
   createdAt: String,
   archived: Boolean,
   user: {
@@ -29,6 +27,5 @@ noteSchema.set('toJSON', {
     };
   },
 });
-
 
 module.exports = noteSchema;

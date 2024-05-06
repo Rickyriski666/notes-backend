@@ -23,7 +23,7 @@ loginRouter.post('/', async (req, res) => {
     id: user._id,
   };
 
-  jwt.sign(userForToken, process.env.SECRET_JWT, {
+  const token = jwt.sign(userForToken, process.env.SECRET_JWT, {
     expiresIn: 3600,
   });
 
@@ -31,7 +31,7 @@ loginRouter.post('/', async (req, res) => {
     status: 'Success',
     message: 'Login Successfull',
     data: {
-      // token,
+      token,
       username: user.username,
       name: user.name,
     },
